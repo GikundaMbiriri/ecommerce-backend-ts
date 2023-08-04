@@ -33,9 +33,13 @@ const updateaProduct = asyncHandler(
       if (req.body.title) {
         req.body.slug = slugify(req.body.title);
       }
-      const updateProduct = await Product.findOneAndUpdate(id, req.body, {
-        new: true,
-      });
+      const updateProduct = await Product.findOneAndUpdate(
+        { _id: id },
+        req.body,
+        {
+          new: true,
+        }
+      );
       res.json(updateProduct);
     } catch (error: any) {
       throw new Error(error);
@@ -210,18 +214,21 @@ const uploadImages = asyncHandler(
     const { id } = req.params;
 
     validateMongodbId(id);
-
-    try {
-      const uploader = (path: string) => cloudinaryUploadImg(path, "images");
-      const urls = [];
-      const files = req.files;
-      for (const file of files) {
+    const uploader = (path: string) => cloudinaryUploadImg(path, "images");
+    const urls = [];
+    const files = req.files;
+    for (const file of files) {
+      try {
         const { path } = file;
+
         const newPath = await uploader(path);
         urls.push(newPath);
         fs.unlinkSync(path);
+      } catch (error: any) {
+        throw new Error(error);
       }
-
+    }
+    try {
       const findProduct = await Product.findByIdAndUpdate(
         id,
         {

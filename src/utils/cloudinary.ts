@@ -7,6 +7,7 @@ cloudinary.config({
 });
 
 const cloudinaryUploadImg = async (fileToUpload: any) => {
+
   return new Promise((resolve) => {
     cloudinary.uploader.upload(fileToUpload, (result: any) => {
       resolve({
